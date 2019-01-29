@@ -61,6 +61,7 @@ namespace nuclear
   double BindEnergyPerNucleonParametrization(const Target & target);
   double FermiMomentumForIsoscalarNucleonParametrization(const Target & target);
 
+  //double NNBarOscillationRadius(double r, int A, double ring=0.);
 
 } // nuclear namespace
 } // utils   namespace

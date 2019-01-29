@@ -31,6 +31,9 @@
  @ Mar 18, 2016 - JJ (SD)
    Check if a local Fermi gas model should be used when calculating the
    Fermi momentum
+ @ January 2019 - FNAL - Joshua Barrow
+   Implemented a new routine for use in the NNBarOscillation module to correctly
+   calculate the radial position of the oscillating neutron
 */
 //____________________________________________________________________________
 
@@ -497,4 +500,23 @@ double x = 1.0 / target.A();
 return (0.27+x*(-1.12887857491+x*(9.72670908033-39.53095724456*x)));
 }
 //___________________________________________________________________________
+/*
+double genie::utils::nuclear::NNBarOscillationRadius(double r, int A, double ring)
+{
+  //New routine for calculating the proper antineutron oscillation and annihilation radius - Joshua Barrow, January 2019
+  //Modified from Steve Dytman
+  if(A==40)//For argon ONLY
+    {
+    
+      LOG("Nuclear",pINFO) << "r= " << r << ", ring= " << ring;
+      
+      TFile* annihilationdistributionfile = new TFile("ArgonAnnihilationProbability.root");
+      TH1F *annhist = (TH1F*)annihilationdistributionfile->Get("hprobJMR");
+      
+      double rho = hprobJMR->GetRandom();//DensityWoodsSaxon(r,c,z,ring);
+      return rho;
+    }
 
+  return 0;
+}
+*/

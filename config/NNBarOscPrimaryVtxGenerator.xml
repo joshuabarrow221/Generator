@@ -4,6 +4,7 @@
 
   <param_set name="Default"> 
      <param type="alg" name="NuclearModel"> genie::NuclearModelMap/Default </param>
+     <param type="string" name="AnnihilationDistributionFile"> ArgonAnnihilationProbability.root </param>
   </param_set>
 
 </alg_conf>

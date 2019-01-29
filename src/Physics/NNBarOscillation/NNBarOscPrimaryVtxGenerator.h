@@ -62,6 +62,7 @@ private:
    mutable TGenPhaseSpace     fPhaseSpaceGenerator;
 
    const NuclearModelI * fNuclModel;
+   string fAnnihilationDistributionFile;
 };
 
 } // genie namespace

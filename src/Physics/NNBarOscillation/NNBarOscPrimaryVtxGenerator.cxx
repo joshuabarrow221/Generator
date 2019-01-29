@@ -7,6 +7,11 @@
  Author: Jeremy Hewes, Georgia Karagiorgi
          University of Manchester
 
+ Modified by Joshua Barrow, January 2019, FNAL
+ Implemented correction to the annihilation radius by eliminating the "Density(r,A)"
+ call from NuclearUtils.cxx and replaced with a numerically defined distribution. I
+ have tried to only comment out all "old" code, and highlighted whatever I have added.
+
  For documentation see the corresponding header file.
 
  Important revisions after version 2.0.0 :
@@ -92,72 +97,126 @@ void NNBarOscPrimaryVtxGenerator::AddInitialState(GHepRecord * event) const
 //          { id: 3, remnant nucleus (kIStStableFinalState)
 //
 
+  //Initialize a four-vector for the position
   TLorentzVector v4(0,0,0,0);
   
   GHepStatus_t stis = kIStInitialState;
   GHepStatus_t stdc = kIStDecayedState;
   GHepStatus_t stfs = kIStStableFinalState;
 
+  //Generate initial PDG code
   int ipdg = fCurrInitStatePdg;
   
   // add initial nucleus
+  //Make mass variable and find mass of nucleus from PDG code
   double Mi  = PDGLibrary::Instance()->Find(ipdg)->Mass();
+  //Create initial four-momentum for (at rest) nucleus
   TLorentzVector p4i(0,0,0,Mi);
+  //Add nucleus to event record as the parent nucleus with position at
+  //space time origin and momenergy of rest mass
   event->AddParticle(ipdg,stis,-1,-1,-1,-1, p4i, v4);
 
   // add oscillating neutron
   int neutpdg = kPdgNeutron;
+  //Make mass variable and find mass for neutron/antineutron from PDG code
   double mneut = PDGLibrary::Instance()->Find(neutpdg)->Mass();
+  //INITIALIZE neutron/antineutron four-momentum as a neutron at rest  
   TLorentzVector p4neut(0,0,0,mneut);
+  //Add the neutron/antineutron to the event record as a "daughter" of mom1
+  //(parent nucleus, above), no second parent, no daughters, and with
+  //four-momentum "p4neut" and space-time position "v4"
   event->AddParticle(neutpdg,stdc,0,-1,-1,-1, p4neut, v4);
 
   // add annihilation nucleon
+  //Do the same as the neutron/antineutron for the annihilation partner
+  //(but must add functionality to make nucleon general, whos identity depends on
+  //the annihlation channel thrown by the MC)
   int dpdg = genie::utils::nnbar_osc::AnnihilatingNucleonPdgCode(fCurrDecayMode);
   double mn = PDGLibrary::Instance()->Find(dpdg)->Mass();
   TLorentzVector p4n(0,0,0,mn);
   event->AddParticle(dpdg,stdc, 0,-1,-1,-1, p4n, v4);
 
   // add nuclear remnant
+  //Make up the leftover nucleus (again depends on annihilation channel)
+  //Initialize A and Z to original PDG code
   int A = pdg::IonPdgCodeToA(ipdg);
   int Z = pdg::IonPdgCodeToZ(ipdg);
+  //Subtract two nucleons from the value of A (it is now a "separate" system)
   A--; A--;
+  //If annihlation is a proton, decrement the value of Z as well
   if(dpdg == kPdgProton) { Z--; }
+  //Create new PDG code for new remant nucleus
   int rpdg = pdg::IonPdgCode(A, Z);
+  //Find the remnant's mass
   double Mf  = PDGLibrary::Instance()->Find(rpdg)->Mass();
+  //INITIALIZE the remant four-momentum to be at rest
   TLorentzVector p4f(0,0,0,Mf);
+  //Remnant nucleus shares same mother/daughter and momentum/position structures
   event->AddParticle(rpdg,stfs,0,-1,-1,-1, p4f, v4);
 }
 //____________________________________________________________________________
 void NNBarOscPrimaryVtxGenerator::GenerateOscillatingNeutronPosition(
   GHepRecord * event) const
 {
+  //Initialize the first particle in the event record as the starting nucleus
   GHepParticle * initial_nucleus = event->Particle(0);
+  //Pass the INTEGER form of the value of the number of nucleons to choose an
+  //initial nucleus (don't decide number of protons/neutrons separately?)
   int A = initial_nucleus->A();
+  //If hydrogen, don't run this general simulation (can run for deuteron?)
   if(A <= 2) {
     return;
   }
 
+  //Throw a random number (between 0 and 1?)
   RandomGen * rnd = RandomGen::Instance();
 
-  double R0 = 1.3;
+  /*Eliminating this portion of the code--------------------------------------
+
+  //Find the radius of the nucleus
+  //Use a constant for R0 (typically given a value of 1.25, not 1.3)
+  double R0 = 1.25;//1.3;
+  //Change the data type of A from int to double calculation of R
   double dA = (double)A;
+  //Calculate the radius of a given nucleus with a given value of A
   double R = R0 * TMath::Power(dA, 1./3.);
-            
+  //This method leads to a ~22% error with the known value of 3.4274+/-0.0027 fm
+  //Thus, I recommend just using R=3.427 since we are concerned mainly with Argon-40,
+  //or using a new method utilizing tables (already within GENIE, perhaps?)
+
+  //Create a Messenger output to track what the generator is doing as a printout
   LOG("NNBarOsc", pINFO)
       << "Generating vertex according to a realistic nuclear density profile";
 
   // get inputs to the rejection method
+  //Initialize ymax (of the radial probability distribution) to a negative value
+  //to make sure that ymax resets to a higher value
   double ymax = -1;
+  //Initialize the maximum radius of the maxima search
   double rmax = 3*R;
+  //Create 40 "infinitesimals" distances of the nucleus (~120 total with rmax)
   double dr   = R/40.;
-  for(double r = 0; r < rmax; r+=dr) {
-      ymax = TMath::Max(ymax, r*r * utils::nuclear::Density(r,A));
-  }
+  //Implement a Von Neumann-style integration method over the whole span of the nucleus
+  for(double r = 0; r < rmax; r+=dr)
+    {
+      //Find the maximum of the probability DENSITY distribution (must multiply by r^2)
+      ymax = TMath::Max(ymax, r*r * utils::nuclear::NNBarOscillationRadius(r,A));//Density(r,A));
+    }
+  //Add a scaling/fudge factor to make sure that we don't eliminate possible maxima
   ymax *= 1.2;
   
-  // select a vertex using the rejection method 
+  // select a vertex using the rejection method
+
+  */
+
+  //Initialize a four-vector
   TLorentzVector vtx(0,0,0,0);
+
+  /*
+
+  //Create a positive integer to interate
   unsigned int iter = 0;
+  //Create an infinite loop
   while(1) {
     iter++;
 
@@ -170,35 +229,72 @@ void NNBarOscPrimaryVtxGenerator::GenerateOscillatingNeutronPosition(
        exception.SwitchOnFastForward();
        throw exception;
     }
-           
+
+    //Throw random radius between 0 and 3R
     double r = rmax * rnd->RndFsi().Rndm();
+    //Throw random probability between 0 and ymax
     double t = ymax * rnd->RndFsi().Rndm();
-    double y = r*r * utils::nuclear::Density(r,A);
+    //Get the probability DENSITY distribution value at that particular value of r
+    double y = r*r * utils::nuclear::NNBarOscillationRadius(r,A);//Density(r,A);
+    //Throw an error if the probability DENSITY distribution value is greater than ymax
     if(y > ymax) {   
        LOG("NNBarOsc", pERROR)
           << "y = " << y << " > ymax = " << ymax << " for r = " << r << ", A = " << A;
     }
+    //Created a boolean variable which reads "true" only when (0,ymax)<y (DENSITY distribution value)
     bool accept = (t < y);
+    //If true, create a particle four-vector with a radomized spherical polar phi component on (0,2pi)
     if(accept) {
+
+  *///The code below is still necessary; all edits are sectioned out----------------
+
+  //The beginning of the new section of code with the annihilation distribution-----
+
+  //Here I import a calculated annihilation distribution developed by Jean-Marc Richard
+  //specifically for the Argon-40 nucleus. Details of the calculation follow similarly
+  //from Friedmann and Gal 2008, and will be explained in our forthcoming paper together
+
+  //Import a file from the local directory (this should probably be done via splines for generality)
+  TFile* annihilationdistributionfile = new TFile( fAnnihilationDistributionFile.c_str() );
+  //Search and find particular saved histogram within that file
+  TH1F *annhist = (TH1F*)annihilationdistributionfile->Get("hprobJMR");
+  //Throw a random radius from this 1D histogram
+  double r = hprobJMR->GetRandom();
+  //I do not believe that any measure of R (the "true" radius of the argon nucleus) is necessary,
+  //as (from what I can tell) it only served as a maximum distance place holder from which to
+  //throw interated values in the above (removed) Von Neumann-like method
+
+  //The ending of the new section of code with the annihilation distribution--------
+
+      //Create phi
        double phi      = 2*constants::kPi * rnd->RndFsi().Rndm();
+       //Derive the cosine of phi
        double cosphi   = TMath::Cos(phi);
+       //Derive the sine of phi
        double sinphi   = TMath::Sin(phi);
+       //Create a value for cosine of theta
        double costheta = -1 + 2 * rnd->RndFsi().Rndm();
+       //Derive the sine of theta accordingly
        double sintheta = TMath::Sqrt(1-costheta*costheta);
+       //Set X,Y,Z, and time compoents of the four-vector
        vtx.SetX(r*sintheta*cosphi);
        vtx.SetY(r*sintheta*sinphi);
        vtx.SetZ(r*costheta);
+       //This occurs at time = 0
        vtx.SetT(0.);
        break;
     }
   } // while 1
 
   // giving position to oscillating neutron
+  //Create next particle (writeen as a neutron, but actually an antineutron)
+  //after initial nucleus in the event record
   GHepParticle * oscillating_neutron = event->Particle(1);
   assert(oscillating_neutron);
   oscillating_neutron->SetPosition(vtx);
 
   // give same position to annihilation nucleon
+  //Create third particle in the event record, coincident in position with initial neutron
   GHepParticle * annihilation_nucleon = event->Particle(2);
   assert(annihilation_nucleon);
   annihilation_nucleon->SetPosition(vtx);
@@ -207,33 +303,47 @@ void NNBarOscPrimaryVtxGenerator::GenerateOscillatingNeutronPosition(
 void NNBarOscPrimaryVtxGenerator::GenerateFermiMomentum(
   GHepRecord * event) const
 {
+  //Initialize the first particle in the event record as the starting nucleus
   GHepParticle * initial_nucleus = event->Particle(0);
+  //Pass the INTEGER form of the value of the number of nucleons to choose an
+  //initial nucleus (don't decide number of protons/neutrons separately?)
   int A = initial_nucleus->A();
+  //If hydrogen, don't run this general simulation (can run for deuteron?)
   if(A <= 2) {
     return;
   }
 
+  //Create the neutron/antineutron as the second particle after the initial nucleus
   GHepParticle * oscillating_neutron = event->Particle(1);
+  //Create the annihilation partner
   GHepParticle * annihilation_nucleon = event->Particle(2);
+  //Create the remant nucleus
   GHepParticle * remnant_nucleus = event->Particle(3);
   assert(oscillating_neutron);
   assert(annihilation_nucleon);
   assert(remnant_nucleus);
 
   // generate a Fermi momentum & removal energy
+  //Initialize nuclear target
   Target tgt(initial_nucleus->Pdg());
-
   // start with oscillating neutron
+  //Choose a neutron to "hit" the target
   tgt.SetHitNucPdg(kPdgNeutron);
   // generate nuclear model & fermi momentum
+  //Choose a fermi momentum distribution and removal energy for the given nucleus
   fNuclModel->GenerateNucleon(tgt);
+  //Create a three-momentum
   TVector3 p3 = fNuclModel->Momentum3();
+  //Create a removal energy
   double w = fNuclModel->RemovalEnergy();
 
   // use mass & momentum to calculate energy
+  //Create neutron mass
   double mass = oscillating_neutron->Mass();
+  //Calculate total energy (taking into account removal/binding energy)
   double energy = sqrt(pow(mass,2) + p3.Mag2()) - w;
   // give new energy & momentum to particle
+  //Set the four vector of the neutron
   TLorentzVector p4(p3, energy);
   oscillating_neutron->SetMomentum(p4);
 
@@ -264,6 +374,7 @@ void NNBarOscPrimaryVtxGenerator::GenerateFermiMomentum(
   p3 = -1 * (oscillating_neutron->GetP4()->Vect() + annihilation_nucleon->GetP4()->Vect());
   // figure out energy from mass & momentum
   mass = remnant_nucleus->Mass();
+  //Get total energy of the remnant nucleus
   energy = sqrt(pow(mass,2) + p3.Mag2());
   // give new energy & momentum to remnant
   p4 = TLorentzVector(p3, energy);
@@ -526,7 +637,9 @@ void NNBarOscPrimaryVtxGenerator::LoadConfig(void)
   
   RgKey nuclkey = "NuclearModel";
   fNuclModel = dynamic_cast<const NuclearModelI *> (this->SubAlg(nuclkey));
-  assert(fNuclModel);  
+  assert(fNuclModel);
+
+  GetParamDef("AnnihilationDistributionFile", fAnnihilationDistributionFile, "ArgonAnnihilationProbability.root");
 }
 //___________________________________________________________________________
 
