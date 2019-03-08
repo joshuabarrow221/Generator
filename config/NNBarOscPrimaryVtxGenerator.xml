@@ -2,10 +2,12 @@
 
 <alg_conf>
 
-  <param_set name="Default"> 
+  <param_set name="Default">
      <param type="alg" name="NuclearModel"> genie::NuclearModelMap/Default </param>
      <param type="string" name="AnnihilationDistributionFile"> ArgonAnnihilationProbability.root </param>
+
+     <param type="string" name="NNHist-bins">   0 ; 1. ; 2. ; 3. </param>
+     <param type="string" name="NNHist-content">  10 ; 20 ; 30.  </param>
   </param_set>
 
 </alg_conf>
-

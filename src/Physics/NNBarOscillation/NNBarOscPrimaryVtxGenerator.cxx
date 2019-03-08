@@ -44,21 +44,21 @@ using namespace genie;
 
 //____________________________________________________________________________
 NNBarOscPrimaryVtxGenerator::NNBarOscPrimaryVtxGenerator() :
-EventRecordVisitorI("genie::NNBarOscPrimaryVtxGenerator")
+EventRecordVisitorI("genie::NNBarOscPrimaryVtxGenerator"), fMyDistribuion(nullptr)
 {
 
 }
 //____________________________________________________________________________
 NNBarOscPrimaryVtxGenerator::NNBarOscPrimaryVtxGenerator(
   string config) :
-EventRecordVisitorI("genie::NNBarOscPrimaryVtxGenerator",config)
+EventRecordVisitorI("genie::NNBarOscPrimaryVtxGenerator",config), fMyDistribuion(nullptr)
 {
 
 }
 //____________________________________________________________________________
-NNBarOscPrimaryVtxGenerator::~NNBarOscPrimaryVtxGenerator() 
+NNBarOscPrimaryVtxGenerator::~NNBarOscPrimaryVtxGenerator()
 {
-
+  if ( fMyDistribuion ) delete fMyDistribuion ;
 }
 //____________________________________________________________________________
 void NNBarOscPrimaryVtxGenerator::ProcessEventRecord(GHepRecord * event) const
@@ -91,7 +91,7 @@ void NNBarOscPrimaryVtxGenerator::AddInitialState(GHepRecord * event) const
 
 // event record looks like this:
 //    id: 0, nucleus (kIStInitialState)
-//    |     
+//    |
 //    |---> { id: 1, neutron         (kIStDecayedState)
 //          { id: 2, nucleon         (kIStDecayedState)
 //          { id: 3, remnant nucleus (kIStStableFinalState)
@@ -99,14 +99,14 @@ void NNBarOscPrimaryVtxGenerator::AddInitialState(GHepRecord * event) const
 
   //Initialize a four-vector for the position
   TLorentzVector v4(0,0,0,0);
-  
+
   GHepStatus_t stis = kIStInitialState;
   GHepStatus_t stdc = kIStDecayedState;
   GHepStatus_t stfs = kIStStableFinalState;
 
   //Generate initial PDG code
   int ipdg = fCurrInitStatePdg;
-  
+
   // add initial nucleus
   //Make mass variable and find mass of nucleus from PDG code
   double Mi  = PDGLibrary::Instance()->Find(ipdg)->Mass();
@@ -120,7 +120,7 @@ void NNBarOscPrimaryVtxGenerator::AddInitialState(GHepRecord * event) const
   int neutpdg = kPdgNeutron;
   //Make mass variable and find mass for neutron/antineutron from PDG code
   double mneut = PDGLibrary::Instance()->Find(neutpdg)->Mass();
-  //INITIALIZE neutron/antineutron four-momentum as a neutron at rest  
+  //INITIALIZE neutron/antineutron four-momentum as a neutron at rest
   TLorentzVector p4neut(0,0,0,mneut);
   //Add the neutron/antineutron to the event record as a "daughter" of mom1
   //(parent nucleus, above), no second parent, no daughters, and with
@@ -204,7 +204,7 @@ void NNBarOscPrimaryVtxGenerator::GenerateOscillatingNeutronPosition(
     }
   //Add a scaling/fudge factor to make sure that we don't eliminate possible maxima
   ymax *= 1.2;
-  
+
   // select a vertex using the rejection method
 
   */
@@ -237,7 +237,7 @@ void NNBarOscPrimaryVtxGenerator::GenerateOscillatingNeutronPosition(
     //Get the probability DENSITY distribution value at that particular value of r
     double y = r*r * utils::nuclear::NNBarOscillationRadius(r,A);//Density(r,A);
     //Throw an error if the probability DENSITY distribution value is greater than ymax
-    if(y > ymax) {   
+    if(y > ymax) {
        LOG("NNBarOsc", pERROR)
           << "y = " << y << " > ymax = " << ymax << " for r = " << r << ", A = " << A;
     }
@@ -365,7 +365,7 @@ void NNBarOscPrimaryVtxGenerator::GenerateFermiMomentum(
   p4 = TLorentzVector(p3, energy);
   annihilation_nucleon->SetMomentum(p4);
 
-  LOG("NNBarOsc", pINFO) 
+  LOG("NNBarOsc", pINFO)
      << "Generated nucleon momentum: ("
      << p3.Px() << ", " << p3.Py() << ", " << p3.Pz() << "), "
      << "|p| = " << p3.Mag();
@@ -405,7 +405,7 @@ void NNBarOscPrimaryVtxGenerator::GenerateDecayProducts(
     sum += m;
   }
 
-  LOG("NNBarOsc", pINFO)  
+  LOG("NNBarOsc", pINFO)
     << "Decaying N = " << pdgv.size() << " particles / total mass = " << sum;
   int initial_nucleus_id      = 0;
   int oscillating_neutron_id  = 1;
@@ -435,7 +435,7 @@ void NNBarOscPrimaryVtxGenerator::GenerateDecayProducts(
   delete p4_1;
   delete p4_2;
 
-  LOG("NNBarOsc", pINFO) 
+  LOG("NNBarOsc", pINFO)
     << "Decaying system p4 = " << utils::print::P4AsString(p4d);
 
   // Set the decay
@@ -446,11 +446,11 @@ void NNBarOscPrimaryVtxGenerator::GenerateDecayProducts(
 
     LOG("NNBarOsc", pINFO)
       << "Not enough energy to generate decay products! Selecting a new final state.";
-    
+
     int mode = 0;
-    
+
     int initial_nucleus_pdg = initial_nucleus->Pdg();
-        
+
     std::string nucleus_pdg = std::to_string(static_cast<long long>(initial_nucleus_pdg));
     if (nucleus_pdg.size() != 10) {
       LOG("NNBarOsc", pERROR)
@@ -470,7 +470,7 @@ void NNBarOscPrimaryVtxGenerator::GenerateDecayProducts(
                             0.360, 0.160, 0.070, 0.020,
                             0.015, 0.065, 0.110, 0.280,
                             0.070, 0.240, 0.100, 0.100 };
-   
+
     for (int i = 0; i < n_modes; i++) {
       // for first 7 branching ratios, multiply by relative proton density
       if (i < 7)
@@ -484,7 +484,7 @@ void NNBarOscPrimaryVtxGenerator::GenerateDecayProducts(
     RandomGen * rnd = RandomGen::Instance();
     rnd->SetSeed(0);
     double p = rnd->RndNum().Rndm();
-    
+
     // loop through all modes, figure out which one our random number corresponds to
     double threshold = 0;
     for (int j = 0; j < n_modes; j++) {
@@ -495,20 +495,20 @@ void NNBarOscPrimaryVtxGenerator::GenerateDecayProducts(
         break;
       }
     }
-    
+
     // create new event record with new final state
     // TODO - I don't think Jeremy meant to make a _new_ record here; it
     // shadows the one passed in...
     // EventRecord * event = new EventRecord;
     Interaction * interaction = Interaction::NOsc((int)fCurrInitStatePdg, mode);
     event->AttachSummary(interaction);
-    
-    fCurrDecayMode = (NNBarOscMode_t) interaction->ExclTag().DecayMode(); 
-    
+
+    fCurrDecayMode = (NNBarOscMode_t) interaction->ExclTag().DecayMode();
+
     pdgv = genie::utils::nnbar_osc::DecayProductList(fCurrDecayMode);
     LOG("NNBarOsc", pINFO) << "Decay product IDs: " << pdgv;
     assert ( pdgv.size() > 1);
-    
+
     // get the decay particles again
     LOG("NNBarOsc", pINFO) << "Performing a phase space decay...";
     idx = 0;
@@ -521,24 +521,24 @@ void NNBarOscPrimaryVtxGenerator::GenerateDecayProducts(
       mass[idx++] = m;
       sum += m;
     }
-    
+
     LOG("NNBarOsc", pINFO)
       << "Decaying N = " << pdgv.size() << " particles / total mass = " << sum;
     LOG("NNBarOsc", pINFO)
       << "Decaying system p4 = " << utils::print::P4AsString(p4d);
-    
+
     permitted = fPhaseSpaceGenerator.SetDecay(*p4d, pdgv.size(), mass);
   }
-  
+
   if(!permitted) {
-     LOG("NNBarOsc", pERROR) 
+     LOG("NNBarOsc", pERROR)
        << " *** Phase space decay is not permitted \n"
        << " Total particle mass = " << sum << "\n"
        << " Decaying system p4 = " << utils::print::P4AsString(p4d);
-     // clean-up 
+     // clean-up
      delete [] mass;
      delete p4d;
-     delete v4d; 
+     delete v4d;
      // throw exception
      genie::exceptions::EVGThreadException exception;
      exception.SetReason("Decay not permitted kinematically");
@@ -550,13 +550,13 @@ void NNBarOscPrimaryVtxGenerator::GenerateDecayProducts(
   //double wmax = fPhaseSpaceGenerator.GetWtMax();
   double wmax = -1;
   for(int i=0; i<200; i++) {
-     double w = fPhaseSpaceGenerator.Generate();   
+     double w = fPhaseSpaceGenerator.Generate();
      wmax = TMath::Max(wmax,w);
   }
   assert(wmax>0);
   wmax *= 2;
 
-  LOG("NNBarOsc", pNOTICE) 
+  LOG("NNBarOsc", pNOTICE)
      << "Max phase space gen. weight @ current hadronic system: " << wmax;
 
   // Generate an unweighted decay
@@ -564,14 +564,14 @@ void NNBarOscPrimaryVtxGenerator::GenerateDecayProducts(
 
   bool accept_decay=false;
   unsigned int itry=0;
-  while(!accept_decay) 
+  while(!accept_decay)
   {
      itry++;
 
      if(itry > controls::kMaxUnweightDecayIterations) {
        // report, clean-up and return
-       LOG("NNBarOsc", pWARN) 
-           << "Couldn't generate an unweighted phase space decay after " 
+       LOG("NNBarOsc", pWARN)
+           << "Couldn't generate an unweighted phase space decay after "
            << itry << " attempts";
        // clean up
        delete [] mass;
@@ -583,27 +583,27 @@ void NNBarOscPrimaryVtxGenerator::GenerateDecayProducts(
        exception.SwitchOnFastForward();
        throw exception;
      }
-     double w  = fPhaseSpaceGenerator.Generate();   
+     double w  = fPhaseSpaceGenerator.Generate();
      if(w > wmax) {
-        LOG("NNBarOsc", pWARN) 
+        LOG("NNBarOsc", pWARN)
            << "Decay weight = " << w << " > max decay weight = " << wmax;
      }
      double gw = wmax * rnd->RndHadro().Rndm();
      accept_decay = (gw<=w);
 
-     LOG("NNBarOsc", pINFO) 
-        << "Decay weight = " << w << " / R = " << gw 
+     LOG("NNBarOsc", pINFO)
+        << "Decay weight = " << w << " / R = " << gw
         << " - accepted: " << accept_decay;
 
   } //!accept_decay
 
   // Insert final state products into a TClonesArray of TMCParticles
-  TLorentzVector v4(*v4d); 
+  TLorentzVector v4(*v4d);
   int idp = 0;
   for(pdg_iter = pdgv.begin(); pdg_iter != pdgv.end(); ++pdg_iter) {
      int pdgc = *pdg_iter;
      TLorentzVector * p4fin = fPhaseSpaceGenerator.GetDecay(idp);
-     GHepStatus_t ist = 
+     GHepStatus_t ist =
         utils::nnbar_osc::DecayProductStatus(fNucleonIsBound, pdgc);
      p4fin->Boost(boost);
      event->AddParticle(pdgc, ist, oscillating_neutron_id,-1,-1,-1, *p4fin, v4);
@@ -618,7 +618,7 @@ void NNBarOscPrimaryVtxGenerator::GenerateDecayProducts(
 //___________________________________________________________________________
 void NNBarOscPrimaryVtxGenerator::Configure(const Registry & config)
 {
-  Algorithm::Configure(config);   
+  Algorithm::Configure(config);
   this->LoadConfig();
 }
 //___________________________________________________________________________
@@ -632,14 +632,46 @@ void NNBarOscPrimaryVtxGenerator::LoadConfig(void)
 {
 //  AlgConfigPool * confp = AlgConfigPool::Instance();
 //  const Registry * gc = confp->GlobalParameterList();
-    
+
   fNuclModel = 0;
-  
+
   RgKey nuclkey = "NuclearModel";
   fNuclModel = dynamic_cast<const NuclearModelI *> (this->SubAlg(nuclkey));
   assert(fNuclModel);
 
   GetParamDef("AnnihilationDistributionFile", fAnnihilationDistributionFile, "ArgonAnnihilationProbability.root");
+
+  std::string raw ;
+  std::vector<std::string> bits ;
+
+  // load the binning of the histogram
+  this -> GetParam( "NNHist-bins", raw ) ;
+  bits = utils::str::Split( raw, ";" ) ;
+
+  std::std::vector<double> binning;
+  utils::str::Convert(bits, binning ) ;
+
+  fMyDistribuion = new TH1D( "put a name", "Put a title", binning.size() -1, & binning[0] ) ;
+
+  //load the content of the histogram
+  this -> GetParam( "NNHist-content", raw ) ;
+  bits = utils::str::Split( raw, ";" ) ;
+
+  std::std::vector<double> content;
+  utils::str::Convert(bits, content ) ;
+
+  // sanity check otherwise abort
+  if ( content.size() != binning.size() - 1 ) {
+     LOG("NNBarOscPrimaryVtxGenerator", pFATAL)
+        << "Hisogram size and content don't match: Exiting" ;
+
+    exit( 78 ) ;
+  }
+
+  // fill the histogram
+  for ( unsigned int i = 1 ; i <= content ; ++i ) {
+    fMyDistribuion -> SetBinContent( i, content[i-1] ) ;
+  }
+
 }
 //___________________________________________________________________________
-

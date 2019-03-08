@@ -63,6 +63,8 @@ private:
 
    const NuclearModelI * fNuclModel;
    string fAnnihilationDistributionFile;
+
+   TH1D * fMyDistribuion ;
 };
 
 } // genie namespace
