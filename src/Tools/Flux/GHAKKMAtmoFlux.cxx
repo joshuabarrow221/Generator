@@ -192,8 +192,12 @@ bool GHAKKMAtmoFlux::FillFluxHisto(int nu_pdg, string filename)
       double fnumubar = 0;
       double fnue     = 0;
       double fnuebar  = 0;
+      //Edit by J. L. Barrow -->> added new nu flavors
+      double fnutau   = 0;
+      double fnutaubar= 0;
 
-      flux_stream >> energy >> fnumu >> fnumubar >> fnue >> fnuebar;
+      //flux_stream >> energy >> fnumu >> fnumubar >> fnue >> fnuebar;
+      flux_stream >> energy >> fnumu >> fnumubar >> fnue >> fnuebar >> fnutau >> fnutaubar;
 
       // fitting this easily into what is done for FLUKA, BGLRS where a 
       // different file is specified for each neurtino species means that
@@ -202,10 +206,12 @@ bool GHAKKMAtmoFlux::FillFluxHisto(int nu_pdg, string filename)
       // components at source and generate interactions for some species only
     
       double flux = 0.;
-      if(nu_pdg == kPdgNuMu    ) flux = fnumu;
-      if(nu_pdg == kPdgAntiNuMu) flux = fnumubar;
-      if(nu_pdg == kPdgNuE     ) flux = fnue;
-      if(nu_pdg == kPdgAntiNuE ) flux = fnuebar;
+      if(nu_pdg == kPdgNuMu      ) flux = fnumu;
+      if(nu_pdg == kPdgAntiNuMu  ) flux = fnumubar;
+      if(nu_pdg == kPdgNuE       ) flux = fnue;
+      if(nu_pdg == kPdgAntiNuE   ) flux = fnuebar;
+      if(nu_pdg == kPdgNuTau     ) flux = fnutau;
+      if(nu_pdg == kPdgAntiNuTau ) flux = fnutaubar;
       LOG("Flux", pDEBUG)
          << "Flux (nu_pdg = " << nu_pdg 
          << "; Ev = " << energy << " GeV / bin used = ["

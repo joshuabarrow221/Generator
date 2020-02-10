@@ -450,10 +450,13 @@ void GAtmoFlux::AddFluxFile(string filename)
     exit(-1);
   }
 
-  fFluxFlavour.push_back(kPdgNuE);      fFluxFile.push_back(filename);
-  fFluxFlavour.push_back(kPdgAntiNuE);  fFluxFile.push_back(filename);
-  fFluxFlavour.push_back(kPdgNuMu);     fFluxFile.push_back(filename);
-  fFluxFlavour.push_back(kPdgAntiNuMu); fFluxFile.push_back(filename);
+  fFluxFlavour.push_back(kPdgNuE);       fFluxFile.push_back(filename);
+  fFluxFlavour.push_back(kPdgAntiNuE);   fFluxFile.push_back(filename);
+  fFluxFlavour.push_back(kPdgNuMu);      fFluxFile.push_back(filename);
+  fFluxFlavour.push_back(kPdgAntiNuMu);  fFluxFile.push_back(filename);
+  //Edit by J. L. Barrow -->> added new nu flavor
+  fFluxFlavour.push_back(kPdgNuTau);     fFluxFile.push_back(filename);
+  fFluxFlavour.push_back(kPdgAntiNuTau); fFluxFile.push_back(filename);
   
 }
 //___________________________________________________________________________
