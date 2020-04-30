@@ -248,8 +248,14 @@ void NucleonDecayPrimaryVtxGenerator::GenerateFermiMomentum(
 
   // generate a Fermi momentum & removal energy
   Target tgt(initial_nucleus->Pdg());
+  ///////////////////////////////////////////////////////
+  //Added by J L Barrow for Local Fermi gas compatibility
+  double decayPos = decayed_nucleon->X4()->Vect().Mag();
+  tgt.SetHitNucPosition( decayPos );
+  ///////////////////////////////////////////////////////
+
   tgt.SetHitNucPdg(decayed_nucleon->Pdg());
-  fNuclModel->GenerateNucleon(tgt);
+  fNuclModel->GenerateNucleon(tgt,decayPos);
   TVector3 p3 = fNuclModel->Momentum3();
   double w    = fNuclModel->RemovalEnergy();
 
