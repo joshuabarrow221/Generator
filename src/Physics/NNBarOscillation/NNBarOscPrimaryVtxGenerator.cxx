@@ -222,11 +222,16 @@ void NNBarOscPrimaryVtxGenerator::GenerateFermiMomentum(
 
   // generate a Fermi momentum & removal energy
   Target tgt(initial_nucleus->Pdg());
+  ///////////////////////////////////////////////////////
+  //Added by J L Barrow for Local Fermi gas compatibility
+  double annihilationPos = oscillating_neutron->X4()->Vect().Mag();
+  tgt.SetHitNucPosition( annihilationPos );
+  ///////////////////////////////////////////////////////
 
   // start with oscillating neutron
   tgt.SetHitNucPdg(kPdgNeutron);
   // generate nuclear model & fermi momentum
-  fNuclModel->GenerateNucleon(tgt);
+  fNuclModel->GenerateNucleon(tgt,annihilationPos);
   TVector3 p3 = fNuclModel->Momentum3();
   double w = fNuclModel->RemovalEnergy();
 
@@ -245,7 +250,7 @@ void NNBarOscPrimaryVtxGenerator::GenerateFermiMomentum(
   // then rinse repeat for the annihilation nucleon
   tgt.SetHitNucPdg(annihilation_nucleon->Pdg());
   // use nuclear model to generate fermi momentum
-  fNuclModel->GenerateNucleon(tgt);
+  fNuclModel->GenerateNucleon(tgt,annihilationPos);
   p3 = fNuclModel->Momentum3();
   w = fNuclModel->RemovalEnergy();
   // use mass & momentum to figure out energy
