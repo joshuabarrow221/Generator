@@ -440,6 +440,11 @@ void HNIntranuke2018::AbsorbHN(
  
   // Handle fermi target
   Target target(ev->TargetNucleus()->Pdg());
+  ///////////////////////////////////////////////////////
+  //Added by J L Barrow for Local Fermi gas compatibility
+  double pPos = p->X4()->Vect().Mag();
+  tgt.SetHitNucPosition( pPos );
+  ///////////////////////////////////////////////////////
 
   // Target should be a deuteron, but for now
   // handling it as seperate nucleons
@@ -485,12 +490,12 @@ void HNIntranuke2018::AbsorbHN(
   if(fDoFermi)
     {
       target.SetHitNucPdg(t1code);
-      fNuclmodel->GenerateNucleon(target);
+      fNuclmodel->GenerateNucleon(target,pPos);
       tP2_1L=fFermiFac * fNuclmodel->Momentum3();
       E2_1L = TMath::Sqrt(tP2_1L.Mag2() + M2_1*M2_1);
  
       target.SetHitNucPdg(t2code);
-      fNuclmodel->GenerateNucleon(target);
+      fNuclmodel->GenerateNucleon(target,pPos);
       tP2_2L=fFermiFac * fNuclmodel->Momentum3();
       E2_2L = TMath::Sqrt(tP2_2L.Mag2() + M2_2*M2_2);
     }
@@ -727,8 +732,13 @@ void HNIntranuke2018::ElasHN(
       // Handle fermi target
       Target target(ev->TargetNucleus()->Pdg());
       //LOG("HAIntranuke2018", pNOTICE) << "Nuclmodel= " << fNuclmodel->ModelType(target) ;
+      ///////////////////////////////////////////////////////
+      //Added by J L Barrow for Local Fermi gas compatibility
+      double pPos = p->X4()->Vect().Mag();
+      tgt.SetHitNucPosition( pPos );
+      ///////////////////////////////////////////////////////
       target.SetHitNucPdg(tcode);
-      fNuclmodel->GenerateNucleon(target);
+      fNuclmodel->GenerateNucleon(target,pPos);
       TVector3 tP3L = fFermiFac * fNuclmodel->Momentum3();
       double tE = TMath::Sqrt(tP3L.Mag2() + Mt*Mt);
       t->SetMomentum(TLorentzVector(tP3L,tE));
@@ -865,9 +875,13 @@ void HNIntranuke2018::GammaInelasticHN(GHepRecord* ev, GHepParticle* p, INukeFat
     {
       // Handle fermi target
       Target target(ev->TargetNucleus()->Pdg());
-
+      ///////////////////////////////////////////////////////
+      //Added by J L Barrow for Local Fermi gas compatibility
+      double pPos = p->X4()->Vect().Mag();
+      tgt.SetHitNucPosition( pPos );
+      ///////////////////////////////////////////////////////
       target.SetHitNucPdg(tcode);
-      fNuclmodel->GenerateNucleon(target);
+      fNuclmodel->GenerateNucleon(target,pPos);
       TVector3 tP3L = fFermiFac * fNuclmodel->Momentum3();
       double tE = TMath::Sqrt(tP3L.Mag2() + Mt*Mt);
       t->SetMomentum(TLorentzVector(tP3L,tE));
