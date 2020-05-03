@@ -175,10 +175,15 @@ void MECGenerator::GenerateFermiMomentum(GHepRecord * event) const
   PDGCodeList pdgv = this->NucleonClusterConstituents(nucleon_cluster->Pdg());
   assert(pdgv.size()==2);
   tgt.SetHitNucPdg(pdgv[0]);
-  fNuclModel->GenerateNucleon(tgt);
+  ///////////////////////////////////////////////////////
+  //Added by J L Barrow for Local Fermi gas compatibility
+  double nucleon_clusterPos = nucleon_cluster->X4()->Vect().Mag();
+  tgt.SetHitNucPosition( nucleon_clusterPos );
+  ///////////////////////////////////////////////////////
+  fNuclModel->GenerateNucleon(tgt,nucleon_clusterPos);
   TVector3 p3a = fNuclModel->Momentum3();
   tgt.SetHitNucPdg(pdgv[1]);
-  fNuclModel->GenerateNucleon(tgt);
+  fNuclModel->GenerateNucleon(tgt,nucleon_clusterPos);
   TVector3 p3b = fNuclModel->Momentum3();
     
   LOG("FermiMover", pINFO)
@@ -191,7 +196,8 @@ void MECGenerator::GenerateFermiMomentum(GHepRecord * event) const
      << "|p| = " << p3b.Mag();
 
   // calcute nucleon cluster momentum
-
+  // J L Barrow: I think we would like for the nucleon cluster to come from the local
+  // model, not be constructed from two nucleons with local momentum dependence...
   TVector3 p3 = p3a + p3b;
     
   LOG("FermiMover", pINFO)
@@ -900,12 +906,18 @@ void MECGenerator::GenerateNSVInitialHadrons(GHepRecord * event) const
     // instantiate an empty local target nucleus, so I can use existing methods
     // to get a momentum from the prevailing Fermi-motion distribution 
     Target tgt(target_nucleus->Pdg());
-
+    
     // NucleonClusterConstituents is an implementation within this class, called with this
     // It using the nucleon cluster from the earlier tests for a pn state,
     // the method returns a vector of pdgs, which hopefully will be of size two.
 
     PDGCodeList pdgv = this->NucleonClusterConstituents(initial_nucleon_cluster->Pdg());
+    ///////////////////////////////////////////////////////
+    //Added by J L Barrow for Local Fermi gas compatibility
+    double nucleon_clusterPos = nucleon_cluster->X4()->Vect().Mag();
+    tgt.SetHitNucPosition( nucleon_clusterPos );
+    ///////////////////////////////////////////////////////
+
     assert(pdgv.size()==2);
 
     // These things need to be saved through to the end of the accept loop.
@@ -973,17 +985,19 @@ void MECGenerator::GenerateNSVInitialHadrons(GHepRecord * event) const
         // so momentum from global Fermi gas, local Fermi gas, or spectral function
         // and removal energy ~0.025 GeV, correlated with density, or from SF distribution
         tgt.SetHitNucPdg(pdgv[0]);
-        fNuclModel->GenerateNucleon(tgt);
+        fNuclModel->GenerateNucleon(tgt,nucleon_clusterPos);
         p31i = fNuclModel->Momentum3();
         removalenergy1 = fNuclModel->RemovalEnergy();
         tgt.SetHitNucPdg(pdgv[1]);
-        fNuclModel->GenerateNucleon(tgt);
+        fNuclModel->GenerateNucleon(tgt,nucleon_clusterPos);
         p32i = fNuclModel->Momentum3();
         removalenergy2 = fNuclModel->RemovalEnergy();
 
         // not sure -- could give option to use Nieves q-value here.
 
         // Now write down the initial cluster four-vector for this choice
+	// J L Barrow: Again, this total should probably be from a local Fermi gas,
+	// not necessarily the individual nucleons
         TVector3 p3i = p31i + p32i;
         double mass2 = PDGLibrary::Instance()->Find( initial_nucleon_cluster_pdg )->Mass();
         mass2 *= mass2;
