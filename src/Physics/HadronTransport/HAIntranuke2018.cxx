@@ -640,13 +640,19 @@ void HAIntranuke2018::InelasticHA(
 
   // set up fermi target
   Target target(ev->TargetNucleus()->Pdg());
+  ///////////////////////////////////////////////////////
+  //Added by J L Barrow for Local Fermi gas compatibility
+  double pPos = p->X4()->Vect().Mag();
+  target.SetHitNucPosition( pPos );
+  ///////////////////////////////////////////////////////
+
   double tM = t.Mass();
 
   // handle fermi momentum
   if(fDoFermi)
     {
       target.SetHitNucPdg(tcode);
-      fNuclmodel->GenerateNucleon(target);
+      fNuclmodel->GenerateNucleon(target,pPos);
       TVector3 tP3 = fFermiFac * fNuclmodel->Momentum3();
       double tE = TMath::Sqrt(tP3.Mag2()+ tM*tM);
       t.SetMomentum(TLorentzVector(tP3,tE));
@@ -901,16 +907,22 @@ void HAIntranuke2018::Inelastic(
 	  TVector3 tP2_1L, tP2_2L;
 	  //TLorentzVector dNucl_P4;
 	  Target target(ev->TargetNucleus()->Pdg());
+	  ///////////////////////////////////////////////////////
+	  //Added by J L Barrow for Local Fermi gas compatibility
+	  double pPos = p->X4()->Vect().Mag();
+	  target.SetHitNucPosition( pPos );
+	  ///////////////////////////////////////////////////////
+
 	  if(fDoFermi)
 	    {
 	      target.SetHitNucPdg(t1code);
-	      fNuclmodel->GenerateNucleon(target);
+	      fNuclmodel->GenerateNucleon(target,pPos);
 	      //LOG("HAIntranuke2018", pNOTICE) << "Nuclmodel= " << fNuclmodel->ModelType(target) ;
 	      tP2_1L=fFermiFac * fNuclmodel->Momentum3();
 	      E2_1L = TMath::Sqrt(tP2_1L.Mag2() + M2_1*M2_1);
  
 	      target.SetHitNucPdg(t2code);
-	      fNuclmodel->GenerateNucleon(target);
+	      fNuclmodel->GenerateNucleon(target,pPos);
 	      tP2_2L=fFermiFac * fNuclmodel->Momentum3();
 	      E2_2L = TMath::Sqrt(tP2_2L.Mag2() + M2_2*M2_2);
 
