@@ -490,12 +490,12 @@ void HNIntranuke2018::AbsorbHN(
   if(fDoFermi)
     {
       target.SetHitNucPdg(t1code);
-      fNuclmodel->GenerateNucleon(target,pPos);
+      fNuclmodel->GenerateNucleon(target/*,pPos*/);
       tP2_1L=fFermiFac * fNuclmodel->Momentum3();
       E2_1L = TMath::Sqrt(tP2_1L.Mag2() + M2_1*M2_1);
  
       target.SetHitNucPdg(t2code);
-      fNuclmodel->GenerateNucleon(target,pPos);
+      fNuclmodel->GenerateNucleon(target/*,pPos*/);
       tP2_2L=fFermiFac * fNuclmodel->Momentum3();
       E2_2L = TMath::Sqrt(tP2_2L.Mag2() + M2_2*M2_2);
     }
@@ -738,7 +738,7 @@ void HNIntranuke2018::ElasHN(
       target.SetHitNucPosition( pPos );
       ///////////////////////////////////////////////////////
       target.SetHitNucPdg(tcode);
-      fNuclmodel->GenerateNucleon(target,pPos);
+      fNuclmodel->GenerateNucleon(target/*,pPos*/);
       TVector3 tP3L = fFermiFac * fNuclmodel->Momentum3();
       double tE = TMath::Sqrt(tP3L.Mag2() + Mt*Mt);
       t->SetMomentum(TLorentzVector(tP3L,tE));
@@ -881,7 +881,7 @@ void HNIntranuke2018::GammaInelasticHN(GHepRecord* ev, GHepParticle* p, INukeFat
       target.SetHitNucPosition( pPos );
       ///////////////////////////////////////////////////////
       target.SetHitNucPdg(tcode);
-      fNuclmodel->GenerateNucleon(target,pPos);
+      fNuclmodel->GenerateNucleon(target/*,pPos*/);
       TVector3 tP3L = fFermiFac * fNuclmodel->Momentum3();
       double tE = TMath::Sqrt(tP3L.Mag2() + Mt*Mt);
       t->SetMomentum(TLorentzVector(tP3L,tE));
