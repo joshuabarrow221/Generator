@@ -914,7 +914,7 @@ void MECGenerator::GenerateNSVInitialHadrons(GHepRecord * event) const
     PDGCodeList pdgv = this->NucleonClusterConstituents(initial_nucleon_cluster->Pdg());
     ///////////////////////////////////////////////////////
     //Added by J L Barrow for Local Fermi gas compatibility
-    double initial_nucleon_clusterPos = iniital_nucleon_cluster->X4()->Vect().Mag();
+    double initial_nucleon_clusterPos = initial_nucleon_cluster->X4()->Vect().Mag();
     tgt.SetHitNucPosition( initial_nucleon_clusterPos );
     ///////////////////////////////////////////////////////
 
