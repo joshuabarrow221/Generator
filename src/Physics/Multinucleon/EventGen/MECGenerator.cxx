@@ -914,8 +914,8 @@ void MECGenerator::GenerateNSVInitialHadrons(GHepRecord * event) const
     PDGCodeList pdgv = this->NucleonClusterConstituents(initial_nucleon_cluster->Pdg());
     ///////////////////////////////////////////////////////
     //Added by J L Barrow for Local Fermi gas compatibility
-    double nucleon_clusterPos = nucleon_cluster->X4()->Vect().Mag();
-    tgt.SetHitNucPosition( nucleon_clusterPos );
+    double initial_nucleon_clusterPos = initial_nucleon_cluster->X4()->Vect().Mag();
+    tgt.SetHitNucPosition( initial_nucleon_clusterPos );
     ///////////////////////////////////////////////////////
 
     assert(pdgv.size()==2);
@@ -985,11 +985,11 @@ void MECGenerator::GenerateNSVInitialHadrons(GHepRecord * event) const
         // so momentum from global Fermi gas, local Fermi gas, or spectral function
         // and removal energy ~0.025 GeV, correlated with density, or from SF distribution
         tgt.SetHitNucPdg(pdgv[0]);
-        fNuclModel->GenerateNucleon(tgt,nucleon_clusterPos);
+        fNuclModel->GenerateNucleon(tgt,initial_nucleon_clusterPos);
         p31i = fNuclModel->Momentum3();
         removalenergy1 = fNuclModel->RemovalEnergy();
         tgt.SetHitNucPdg(pdgv[1]);
-        fNuclModel->GenerateNucleon(tgt,nucleon_clusterPos);
+        fNuclModel->GenerateNucleon(tgt,initial_nucleon_clusterPos);
         p32i = fNuclModel->Momentum3();
         removalenergy2 = fNuclModel->RemovalEnergy();
 

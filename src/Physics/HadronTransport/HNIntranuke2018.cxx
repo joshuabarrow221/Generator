@@ -443,7 +443,7 @@ void HNIntranuke2018::AbsorbHN(
   ///////////////////////////////////////////////////////
   //Added by J L Barrow for Local Fermi gas compatibility
   double pPos = p->X4()->Vect().Mag();
-  tgt.SetHitNucPosition( pPos );
+  target.SetHitNucPosition( pPos );
   ///////////////////////////////////////////////////////
 
   // Target should be a deuteron, but for now
@@ -735,7 +735,7 @@ void HNIntranuke2018::ElasHN(
       ///////////////////////////////////////////////////////
       //Added by J L Barrow for Local Fermi gas compatibility
       double pPos = p->X4()->Vect().Mag();
-      tgt.SetHitNucPosition( pPos );
+      target.SetHitNucPosition( pPos );
       ///////////////////////////////////////////////////////
       target.SetHitNucPdg(tcode);
       fNuclmodel->GenerateNucleon(target,pPos);
@@ -878,7 +878,7 @@ void HNIntranuke2018::GammaInelasticHN(GHepRecord* ev, GHepParticle* p, INukeFat
       ///////////////////////////////////////////////////////
       //Added by J L Barrow for Local Fermi gas compatibility
       double pPos = p->X4()->Vect().Mag();
-      tgt.SetHitNucPosition( pPos );
+      target.SetHitNucPosition( pPos );
       ///////////////////////////////////////////////////////
       target.SetHitNucPdg(tcode);
       fNuclmodel->GenerateNucleon(target,pPos);
