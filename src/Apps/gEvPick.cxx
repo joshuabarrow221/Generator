@@ -154,7 +154,8 @@ typedef enum EGPickTopo {
   kPtNumuNC1pim,
   kPtNumuCChyperon,
   kPtNumubarCChyperon,
-  kPtCChyperon
+  kPtCChyperon,
+  kPtNoMEC
 
 } GPickTopo_t;
 
@@ -280,6 +281,7 @@ bool AcceptEvent(const EventRecord & event)
   bool isnumubar = (nupdg == kPdgAntiNuMu);
   bool iscc      = interaction->ProcInfo().IsWeakCC();
   bool isnc      = interaction->ProcInfo().IsWeakNC();
+  bool ismec     = interaction->ProcInfo().IsMEC();
 
   int NfP        = 0; // number of protons         in final state
   int NfPbar     = 0; // number of anti-protons    in final state
@@ -376,6 +378,10 @@ bool AcceptEvent(const EventRecord & event)
   if ( gPickedTopology == kPtCChyperon ) {
     if(iscc && has_hype) return true;
   }
+  else
+  if ( gPickedTopology == kPtNoMEC ) {
+    if(!ismec) return true;
+  }
 
   return false;
 }
@@ -414,6 +420,7 @@ void GetCommandLineArgs(int argc, char ** argv)
     else if ( topo == "numu_cc_hyperon"    ) { gPickedTopology = kPtNumuCChyperon;    }
     else if ( topo == "numubar_cc_hyperon" ) { gPickedTopology = kPtNumubarCChyperon; }
     else if ( topo == "cc_hyperon"         ) { gPickedTopology = kPtCChyperon;        }
+    else if ( topo == "nomec"              ) { gPickedTopology = kPtNoMEC;            }
     else                                     { gPickedTopology = kPtUndefined;        }
 
     if(gPickedTopology == kPtUndefined) {
@@ -460,6 +467,7 @@ string DefaultOutputFile(void)
   else if (gPickedTopology == kPtNumuCChyperon    ) { tp = "numu_cc_hyperon";    }
   else if (gPickedTopology == kPtNumubarCChyperon ) { tp = "numubar_cc_hyperon"; }
   else if (gPickedTopology == kPtCChyperon        ) { tp = "cc_hyperon";         } 
+  else if (gPickedTopology == kPtNoMEC            ) { tp = "nomec";         } 
 
   ostringstream fnm;
   fnm << "gntp." << tp << ".ghep.root";
