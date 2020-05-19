@@ -154,7 +154,15 @@ typedef enum EGPickTopo {
   kPtNumuNC1pim,
   kPtNumuCChyperon,
   kPtNumubarCChyperon,
-  kPtCChyperon
+  kPtCChyperon,
+  // Added by J. L. Barrow
+  kPtNuallCCNC1Kp,    // CC/NC produced single K^+ topologies
+  kPtNuallCCNC1Km,    // CC/NC produced single K^- topologies
+  kPtNuallCCNCK0,     // CC/NC produced single/multiple K0/K0bar topologies
+  kPtNuallCCNCKpm,    // CC/NC produced single/multiple K^+/- topologies
+  kPtNuallCCNCK,      // CC/NC produced single/multiple Kaons (all types) topologies
+  kPtNoTausCC,        // Take all events except any nutaubars thrown
+  kPtIsMEC            // Take all events with MEC interaction
 
 } GPickTopo_t;
 
@@ -275,31 +283,36 @@ bool AcceptEvent(const EventRecord & event)
 
   const Interaction * interaction = event.Summary();
 
-  int  nupdg     = event.Probe()->Pdg();
-  bool isnumu    = (nupdg == kPdgNuMu);
-  bool isnumubar = (nupdg == kPdgAntiNuMu);
-  bool iscc      = interaction->ProcInfo().IsWeakCC();
-  bool isnc      = interaction->ProcInfo().IsWeakNC();
+  int  nupdg         = event.Probe()->Pdg();
+  bool isnue         = (nupdg == kPdgNuE);
+  bool isnuebar      = (nupdg == kPdgAntiNuE);
+  bool isnumu        = (nupdg == kPdgNuMu);
+  bool isnumubar     = (nupdg == kPdgAntiNuMu);
+  bool isnutau       = (nupdg == kPdgNuTau);
+  bool isnutaubar    = (nupdg == kPdgAntiNuTau);
+  bool iscc          = interaction->ProcInfo().IsWeakCC();
+  bool isnc          = interaction->ProcInfo().IsWeakNC();
+  bool ismec         = interaction->ProcInfor().IsMEC();
 
-  int NfP        = 0; // number of protons         in final state
-  int NfPbar     = 0; // number of anti-protons    in final state
-  int NfN        = 0; // number of neutrons        in final state
-  int NfNbar     = 0; // number of anti-neutrons   in final state
-  int NfPip      = 0; // number of \pi^+'s         in final state
-  int NfPim      = 0; // number of \pi^-'s         in final state
-  int NfPi0      = 0; // number of \pi^0's         in final state
-  int NfKp       = 0; // number of \K^+'s          in final state
-  int NfKm       = 0; // number of \K^-'s          in final state
-  int NfK0       = 0; // number of \K^0's          in final state
-  int NfK0bar    = 0; // number of \bar{\K^0}'s    in final state
-  int NfSigmap   = 0; // number of \Sigma^+'s      in final state
-  int NfSigma0   = 0; // number of \Sigma^0's      in final state
-  int NfSigmam   = 0; // number of \Sigma^-'s      in final state
-  int NfLambda0  = 0; // number of \Lambda^0's     in final state
-  int NfXi0      = 0; // number of \Xi^0's         in final state
-  int NfXim      = 0; // number of \Xi^-'s         in final state
-  int NfOmegam   = 0; // number of \Omega^-'s      in final state
-  int NfOther    = 0; // number of other particles in final state
+  int NfP            = 0; // number of protons         in final state
+  int NfPbar         = 0; // number of anti-protons    in final state
+  int NfN            = 0; // number of neutrons        in final state
+  int NfNbar         = 0; // number of anti-neutrons   in final state
+  int NfPip          = 0; // number of \pi^+'s         in final state
+  int NfPim          = 0; // number of \pi^-'s         in final state
+  int NfPi0          = 0; // number of \pi^0's         in final state
+  int NfKp           = 0; // number of \K^+'s          in final state
+  int NfKm           = 0; // number of \K^-'s          in final state
+  int NfK0           = 0; // number of \K^0's          in final state
+  int NfK0bar        = 0; // number of \bar{\K^0}'s    in final state
+  int NfSigmap       = 0; // number of \Sigma^+'s      in final state
+  int NfSigma0       = 0; // number of \Sigma^0's      in final state
+  int NfSigmam       = 0; // number of \Sigma^-'s      in final state
+  int NfLambda0      = 0; // number of \Lambda^0's     in final state
+  int NfXi0          = 0; // number of \Xi^0's         in final state
+  int NfXim          = 0; // number of \Xi^-'s         in final state
+  int NfOmegam       = 0; // number of \Omega^-'s      in final state
+  int NfOther        = 0; // number of other particles in final state
 
   TObjArrayIter piter(&event);
   GHepParticle * p = 0;
@@ -340,6 +353,12 @@ bool AcceptEvent(const EventRecord & event)
   bool is1pi0X  = (NfPip==0 && NfPi0==1 && NfPim==0);
   bool is1pimX  = (NfPip==0 && NfPi0==0 && NfPim==1);
   bool has_hype = (NfSigmap+NfSigma0+NfSigmam+NfLambda0+NfXi0+NfXim+NfOmegam > 0);
+  // Added by J. L. Barrow
+  bool has_K    = (NfKp+NfKm+NfK0+NfK0bar>0);
+  bool has_Kpm  = (NfKp+NfKm>0 && NfK0==0 && NfK0bar==0);
+  bool has_K0   = (NfKp==0 && NfKm==0 && NfK0+NfK0bar>0);
+  bool is1Kp    = (NfKp==1 && NfKm==0 && NfK0==0 && NfK0bar==0);
+  bool is1Km    = (NfKp==0 && NfKm==1 && NfK0==0 && NfK0bar==0);
 
   if ( gPickedTopology == kPtNumuCC1pip ) {
     if(isnumu && iscc && is1pipX) return true;
@@ -377,6 +396,35 @@ bool AcceptEvent(const EventRecord & event)
     if(iscc && has_hype) return true;
   }
 
+  // Added by J. L. Barrow
+  else
+    if ( gPickedTopology == kPtIsMEC ) { // MEC events
+    if(ismec) return true;
+  }
+  else
+  if ( gPickedTopology == kPtNuallCCNC1Kp ) { // CC/NC produced single K^+ topologies
+    if(is1Kp) return true;
+  }
+  else
+  if ( gPickedTopology == kPtNuallCCNC1Km ) { // CC/NC produced single K^- topologies
+    if(is1Km) return true;
+  }
+  else
+  if ( gPickedTopology == kPtNuallCCNCK0 ) { // CC/NC produced single/multiple K0/K0bar topologies
+    if(has_K0) return true;
+  }
+  else
+    if ( gPickedTopology == kPtNuallCCNCKpm ) { // CC/NC produced single/multiple K^+/- topologies
+    if(has_Kpm) return true;
+  }
+  elsex
+    if ( gPickedTopology == kPtNuallCCNCK ) { // CC/NC produced single/multiple Kaons (all types) topologies
+    if(has_K) return true;
+  }
+   else
+    if ( gPickedTopology == kPtNoTausCC ) { // All CC/NC types of events except NuTau/AntiNuTau CC events
+    if( ((isnue || isnuebar || isnumu || isnumubar) && (iscc || isnc)) || ((isnutau || isnutaubar) && (isnc)) ) return true;
+  }
   return false;
 }
 //____________________________________________________________________________________
@@ -404,17 +452,27 @@ void GetCommandLineArgs(int argc, char ** argv)
   string topo = "";
   if( parser.OptionExists('t') ) {
     topo = parser.ArgAsString('t');
-    if      ( topo == "all"                ) { gPickedTopology = kPtAll;              }
-    else if ( topo == "numu_cc_1pip"       ) { gPickedTopology = kPtNumuCC1pip;       }
-    else if ( topo == "numu_cc_1pi0"       ) { gPickedTopology = kPtNumuCC1pi0;       }
-    else if ( topo == "numu_cc_1pim"       ) { gPickedTopology = kPtNumuCC1pim;       }
-    else if ( topo == "numu_nc_1pip"       ) { gPickedTopology = kPtNumuNC1pip;       }
-    else if ( topo == "numu_nc_1pi0"       ) { gPickedTopology = kPtNumuNC1pi0;       }
-    else if ( topo == "numu_nc_1pim"       ) { gPickedTopology = kPtNumuNC1pim;       }
-    else if ( topo == "numu_cc_hyperon"    ) { gPickedTopology = kPtNumuCChyperon;    }
-    else if ( topo == "numubar_cc_hyperon" ) { gPickedTopology = kPtNumubarCChyperon; }
-    else if ( topo == "cc_hyperon"         ) { gPickedTopology = kPtCChyperon;        }
-    else                                     { gPickedTopology = kPtUndefined;        }
+    if      ( topo == "all"                   ) { gPickedTopology = kPtAll;              }
+    else if ( topo == "numu_cc_1pip"          ) { gPickedTopology = kPtNumuCC1pip;       }
+    else if ( topo == "numu_cc_1pi0"          ) { gPickedTopology = kPtNumuCC1pi0;       }
+    else if ( topo == "numu_cc_1pim"          ) { gPickedTopology = kPtNumuCC1pim;       }
+    else if ( topo == "numu_nc_1pip"          ) { gPickedTopology = kPtNumuNC1pip;       }
+    else if ( topo == "numu_nc_1pi0"          ) { gPickedTopology = kPtNumuNC1pi0;       }
+    else if ( topo == "numu_nc_1pim"          ) { gPickedTopology = kPtNumuNC1pim;       }
+    else if ( topo == "numu_cc_hyperon"       ) { gPickedTopology = kPtNumuCChyperon;    }
+    else if ( topo == "numubar_cc_hyperon"    ) { gPickedTopology = kPtNumubarCChyperon; }
+    else if ( topo == "cc_hyperon"            ) { gPickedTopology = kPtCChyperon;        }
+
+    // Added by J. L. Barrow 
+    else if ( topo == "ismec"                 ) { gPickedTopology = kPtIsMEC;            }
+    else if ( topo == "nuall_ccnc_1kaonp"     ) { gPickedTopology = kPtNuallCCNC1Kp;     }
+    else if ( topo == "nuall_ccnc_1kaonm"     ) { gPickedTopology = kPtNuallCCNC1Km;     }
+    else if ( topo == "nuall_ccnc_anykaon0"   ) { gPickedTopology = kPtNuallCCNCK0;      }
+    else if ( topo == "nuall_ccnc_anykaonpm"  ) { gPickedTopology = kPtNuallCCNCKpm;     }
+    else if ( topo == "nuall_ccnc_anykaon"    ) { gPickedTopology = kPtNuallCCNCK;       }
+    else if ( topo == "nocctautaubar"         ) { gPickedTopology = kPtNoTausCC;         }
+
+    else                                        { gPickedTopology = kPtUndefined;        }
 
     if(gPickedTopology == kPtUndefined) {
       LOG("gevpick", pFATAL) << "Unknown topology (" << topo << ")";
@@ -460,6 +518,15 @@ string DefaultOutputFile(void)
   else if (gPickedTopology == kPtNumuCChyperon    ) { tp = "numu_cc_hyperon";    }
   else if (gPickedTopology == kPtNumubarCChyperon ) { tp = "numubar_cc_hyperon"; }
   else if (gPickedTopology == kPtCChyperon        ) { tp = "cc_hyperon";         } 
+
+  // Added by J. L. Barrow
+  else if (gPickedTopology == kPtIsMEC            ) { tp = "ismec";              } 
+  else if (gPickedTopology == kPtNuallCCNC1Kp     ) { tp = "nuall_ccnc_kaonp";   }
+  else if (gPickedTopology == kPtNuallCCNC1Km     ) { tp = "nuall_ccnc_kaonm";   }
+  else if (gPickedTopology == kPtNuallCCNCK0      ) { tp = "nuall_ccnc_kaon0";   }
+  else if (gPickedTopology == kPtNuallCCNCKpm     ) { tp = "nuall_ccnc_kaonpm";  }
+  else if (gPickedTopology == kPtNuallCCNCK       ) { tp = "nuall_ccnc_kaon";    }
+  else if (gPickedTopology == kPtNoTausCC         ) { tp = "nocctautaubar";      }
 
   ostringstream fnm;
   fnm << "gntp." << tp << ".ghep.root";
