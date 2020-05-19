@@ -292,7 +292,7 @@ bool AcceptEvent(const EventRecord & event)
   bool isnutaubar    = (nupdg == kPdgAntiNuTau);
   bool iscc          = interaction->ProcInfo().IsWeakCC();
   bool isnc          = interaction->ProcInfo().IsWeakNC();
-  bool ismec         = interaction->ProcInfor().IsMEC();
+  bool ismec         = interaction->ProcInfo().IsMEC();
 
   int NfP            = 0; // number of protons         in final state
   int NfPbar         = 0; // number of anti-protons    in final state
@@ -417,7 +417,7 @@ bool AcceptEvent(const EventRecord & event)
     if ( gPickedTopology == kPtNuallCCNCKpm ) { // CC/NC produced single/multiple K^+/- topologies
     if(has_Kpm) return true;
   }
-  elsex
+  else
     if ( gPickedTopology == kPtNuallCCNCK ) { // CC/NC produced single/multiple Kaons (all types) topologies
     if(has_K) return true;
   }
