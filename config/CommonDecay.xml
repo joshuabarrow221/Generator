@@ -33,24 +33,24 @@ University of Liverpool
 	     Switch on charm decays if your detector doesn't see charm hadron tracks and
 	     your detector simulation doesn't want to handle these decays.
      -->
-     <param type="bool" name="DecayParticleWithCode=411">   false </param>  <!--  D^{+}             -->
-     <param type="bool" name="DecayParticleWithCode=-411">  false </param>  <!--  D^{-}             -->
-     <param type="bool" name="DecayParticleWithCode=421">   false </param>  <!--  D^{0}             -->
-     <param type="bool" name="DecayParticleWithCode=-421">  false </param>  <!--  \bar{D^{0}}       -->
-     <param type="bool" name="DecayParticleWithCode=431">   false </param>  <!--  D_{s}^{+}         -->
-     <param type="bool" name="DecayParticleWithCode=-431">  false </param>  <!--  D_{s}^{-}         -->
-     <param type="bool" name="DecayParticleWithCode=4122">  false </param>  <!--  Lambda_{c}^{+}    -->
-     <param type="bool" name="DecayParticleWithCode=4112">  false </param>  <!--  Sigma_{c}^{0}     -->
-     <param type="bool" name="DecayParticleWithCode=4212">  false </param>  <!--  Sigma_{c}^{+}     -->
-     <param type="bool" name="DecayParticleWithCode=4222">  false </param>  <!--  Sigma_{c}^{++}    -->
+     <param type="bool" name="DecayParticleWithCode=411">   true </param>  <!--  D^{+}             -->
+     <param type="bool" name="DecayParticleWithCode=-411">  true </param>  <!--  D^{-}             -->
+     <param type="bool" name="DecayParticleWithCode=421">   true </param>  <!--  D^{0}             -->
+     <param type="bool" name="DecayParticleWithCode=-421">  true </param>  <!--  \bar{D^{0}}       -->
+     <param type="bool" name="DecayParticleWithCode=431">   true </param>  <!--  D_{s}^{+}         -->
+     <param type="bool" name="DecayParticleWithCode=-431">  true </param>  <!--  D_{s}^{-}         -->
+     <param type="bool" name="DecayParticleWithCode=4122">  true </param>  <!--  Lambda_{c}^{+}    -->
+     <param type="bool" name="DecayParticleWithCode=4112">  true </param>  <!--  Sigma_{c}^{0}     -->
+     <param type="bool" name="DecayParticleWithCode=4212">  true </param>  <!--  Sigma_{c}^{+}     -->
+     <param type="bool" name="DecayParticleWithCode=4222">  true </param>  <!--  Sigma_{c}^{++}    -->
 
      <!--
 	     Taus: Not decayed by default.
 	     Switch on tau decays if your detector doesn't see tau tracks and
 	     your detector simulation doesn't want to handle these decays.
      -->
-     <param type="bool" name="DecayParticleWithCode=15">    false </param>  <!--  tau^{-}           -->
-     <param type="bool" name="DecayParticleWithCode=-15">   false </param>  <!--  tau^{+}           -->
+     <param type="bool" name="DecayParticleWithCode=15">    true </param>  <!--  tau^{-}           -->
+     <param type="bool" name="DecayParticleWithCode=-15">   true </param>  <!--  tau^{+}           -->
 
      <!--
 	     Standard particles that get decayed by GENIE
